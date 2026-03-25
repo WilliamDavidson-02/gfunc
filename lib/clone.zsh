@@ -112,7 +112,18 @@ EOF
     default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null \
       | sed 's|refs/remotes/origin/||')
 
+    # If the default branch appears anywhere in the selection, check that out.
+    # Otherwise check out the first selected branch.
+    local checkout_branch="${first_branch}"
     for branch in "${selected_branches[@]}"; do
+      if [[ "${branch}" == "${default_branch}" ]]; then
+        checkout_branch="${default_branch}"
+        break
+      fi
+    done
+
+    for branch in "${selected_branches[@]}"; do
+      # Skip the branch we will check out — git clone already has it
       if [[ "${branch}" == "${default_branch}" ]]; then
         echo "  Already on default: ${branch}"
         continue
@@ -124,15 +135,13 @@ EOF
       fi
     done
 
-    # Check out the first selected branch unless it is the default
-    if [[ "${first_branch}" != "${default_branch}" ]]; then
-      echo ""
-      echo "  Checking out ${first_branch}..."
-      git checkout "${first_branch}" 2>/dev/null \
-        || git checkout -b "${first_branch}" --track "origin/${first_branch}"
-    else
-      echo ""
+    echo ""
+    if [[ "${checkout_branch}" == "${default_branch}" ]]; then
       echo "  Staying on default branch: ${default_branch}"
+    else
+      echo "  Checking out ${checkout_branch}..."
+      git checkout "${checkout_branch}" 2>/dev/null \
+        || git checkout -b "${checkout_branch}" --track "origin/${checkout_branch}"
     fi
   fi
 
