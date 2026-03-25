@@ -1,0 +1,12 @@
+# .shellcheckrc
+shell=bash          # closest supported dialect to zsh
+enable=all
+
+# These are zsh-isms shellcheck flags as bash-incompatible but are fine here
+disable=SC1071      # zsh shebang not recognised
+disable=SC2296      # zsh parameter expansion with (P) flag
+disable=SC2298      # zsh (P) indirect variable reference
+
+# These fire on intentional patterns in the codebase
+disable=SC2034      # unused variable — false positives on zsh locals
+disable=SC2148      # no shebang — lib files are sourced, not executed
